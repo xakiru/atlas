@@ -69,9 +69,21 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if not transparency:
             return
 
+        print("pp")
+        print(pp.image)
+
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
 
+
+        print("back pp")
+        print(Image.fromarray(image))
+
+
+        print("image")
+        print(image)
+        
             
+
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         thresh = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
@@ -171,9 +183,9 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
             #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
             #raf.append(Image.fromarray(cv2.merge((r, g, b, a))))
-            output=Image.fromarray(cv2.merge((r, g, b, a)))
+            output=result_with_alpha #Image.fromarray(cv2.merge((r, g, b, a)))
         #raf = img
-        pp.image=output
+        #pp.image=output
 
         hh, ww = image.shape[:2]
 
@@ -205,9 +217,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             x_offset += tile_width
 
         #output = cv2.cvtColor(output.astype('uint8'), cv2.COLOR_RGBA2BGRA)
+
+
+        print("output")
         print(output)
-        print(pp.image)
-        pp.image=output
+        pp.image=pp.image
         
         #pp.info["Magenta pixel size"] = pixel_size
 
