@@ -216,12 +216,16 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # Shift the x offset
             x_offset += tile_width
 
+        output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
         #output = cv2.cvtColor(output.astype('uint8'), cv2.COLOR_RGBA2BGRA)
 
 
         print("output")
         print(output)
-        pp.image=pp.image
+
+        print(Image.fromarray(output))
+
+        pp.image=Image.fromarray(output)
         
         #pp.info["Magenta pixel size"] = pixel_size
 
