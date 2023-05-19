@@ -19,7 +19,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     model = None
 
     def ui(self):
-        return {}
+        with FormRow():
+            with gr.Column():
+                with FormRow():
+                    enable = gr.Checkbox(False, label="Enable")
+
+        return {"enable": enable,}
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_intermediate, save_magenta, forward_magenta,remove_magenta):
         if not pp.info["magenta"]:
