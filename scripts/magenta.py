@@ -48,7 +48,7 @@ import numpy as np
 
 class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     name = "Magenta"
-    order = 10000
+    order = 9000
     model = None
 
     def ui(self):
@@ -174,7 +174,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             output=Image.fromarray(cv2.merge((r, g, b, a)))
         #raf = img
         pp.image=output
-        
+
         hh, ww = image.shape[:2]
 
         # Define the tile size
@@ -204,7 +204,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             x_offset += tile_width
 
         output = cv2.cvtColor(output.astype('uint8'), cv2.COLOR_RGBA2BGRA)
-        
+        pp.image=output
         
         #pp.info["Magenta pixel size"] = pixel_size
 
