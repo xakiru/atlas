@@ -55,7 +55,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         with FormRow():
             with gr.Column():
                 with FormRow():
-                    transparency = gr.Checkbox(False, label="transparency")
+                    enable = gr.Checkbox(False, label="enable")
 
             with gr.Column():
                 outline_size = gr.Slider(minimum=1, maximum=8, step=1, label="Pixel size", value=4, elem_id="outline_size")
@@ -65,14 +65,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             "outline_size": outline_size,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, transparency, outline_size):
-        if not transparency:
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, outline_size):
+        if not enable:
             return
 
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
-        
-            
-
+ 
         img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #kernel = np.ones((3, 3), np.uint8)
         #img_gray_eroded = cv2.erode(img_gray, kernel, iterations=1)
