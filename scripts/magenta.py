@@ -12,39 +12,6 @@ from skimage import measure
 from modules import scripts_postprocessing
 
 
-class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
-    name = "Transparency & Outline"
-    order = 10000
-    def ui(self):
-        transparency = gr.Checkbox(True, label="transparency")
-        outline_size = gr.Slider(minimum=0, maximum=8, step=1, Outline="Pixel size", value=1, elem_id="outline_size")
-        return [transparency, outline_size]
-
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, transparency, outline_size):
-        if not transparency:
-            return
-
-        print(pp.image)
-        print(pp.images)
-        pp.image = pp.image.resize((pp.image.width * 4 // pixel_size, pp.image.height * 4 // pixel_size))
-
-        pp.info["Magenta"] = True
-
-
-import os
-
-from modules import scripts_postprocessing, devices, scripts
-import gradio as gr
-
-from modules.ui_components import FormRow
-
-import torch
-import torchvision.transforms as transforms
-from PIL import Image
-import numpy as np
-
-
-
 
 class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     name = "Magenta"
@@ -55,19 +22,29 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         with FormRow():
             with gr.Column():
                 with FormRow():
-                    enable = gr.Checkbox(False, label="enable")
+                    enable = gr.Checkbox(False, label="Enable")
+                    remove_magenta = gr.Checkbox(False, label="Remove Magenta Module")
 
             with gr.Column():
-                outline_size = gr.Slider(minimum=1, maximum=8, step=1, label="Pixel size", value=4, elem_id="outline_size")
-
+                with FormRow():
+                    save_intermediate = gr.Checkbox(False, label="Save intermediate")
+                    save_magenta = gr.Checkbox(False, label="Save Magenta")
+                    forward_magenta = gr.Checkbox(True, label="Forward Magenta")
         return {
             "enable": enable,
-            "outline_size": outline_size,
+            "save_intermediate": save_intermediate,
+            "save_magenta": save_magenta,
+            "forward_magenta": forward_magenta,
+            "remove_magenta": remove_magenta,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, outline_size):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_intermediate, save_magenta, forward_magenta,remove_magenta):
         if not enable:
             return
+
+        if (save_intermediate):
+            images.save_image(pp.image, pp.outpath_samples, "inter_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
+        
 
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
         img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -230,7 +207,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         bg = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
 
 
-        pp.image=Image.fromarray(output)
+        if (save_magenta):
+            images.save_image(Image.fromarray(output), pp.outpath_samples, "magenta_", proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
         
-        #pp.info["Magenta pixel size"] = pixel_size
+        if (forward_magenta):
+            pp.image=Image.fromarray(output) 
+        
+        pp.info["magenta"] = remove_magenta
 
