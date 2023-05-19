@@ -11,6 +11,7 @@ from modules.shared import opts, cmd_opts, state
 
 from modules import scripts_postprocessing
 
+
 class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     name = "Transparency & Outline"
     order = 10000
