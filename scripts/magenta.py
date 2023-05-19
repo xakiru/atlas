@@ -22,9 +22,8 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     def ui(self):
         with FormRow():
             with gr.Column():
-                with FormRow():
-                    enable = gr.Checkbox(False, label="Enable")
-                    remove_magenta = gr.Checkbox(False, label="Remove Magenta Module")
+                enable = gr.Checkbox(False, label="Enable Magenta")
+                remove_magenta = gr.Checkbox(False, label="Remove Magenta Module")
 
             with gr.Column():
                 with FormRow():
@@ -43,8 +42,9 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if not enable:
             return
 
+        print(pp)
         if (save_intermediate):
-            images.save_image(pp.image, pp.outpath_samples, "inter_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
+            images.save_image(pp.image, pp.outpath_samples, "inter_" , proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
         
 
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
