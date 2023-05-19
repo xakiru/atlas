@@ -212,7 +212,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         # Create an output image with a transparent background, of the size of the atlas
         output = np.zeros((tile_height, tile_width * len(sprites), 4), dtype=np.uint8)
-        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
+        #output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
 
         # Position of the image in the output image
         # Position of the image in the output image
