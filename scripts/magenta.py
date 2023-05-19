@@ -69,22 +69,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if not transparency:
             return
 
-        print("pp")
-        print(pp.image)
-
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
-
-
-        print("back pp")
-        print(Image.fromarray(image))
-
-
-        print("image")
-        print(image)
         
             
 
-        img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+       img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #kernel = np.ones((3, 3), np.uint8)
         #img_gray_eroded = cv2.erode(img_gray, kernel, iterations=1)
         #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
@@ -95,19 +84,32 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
 
 
-        imshow('img',img_gray)
         img_gray=255-img_gray
         # Find connected components (blobs) in the image
         labels = measure.label(img_gray, connectivity=2, background=0)
-        print(labels)
         # Create a new image to draw the mask on
         mask = np.zeros_like(img_gray, dtype=np.uint8)
         cmask = np.zeros_like(img_gray, dtype=np.uint8)
         general_mask = np.zeros_like(img_gray, dtype=np.uint8)
 
-        sprites=[]
-        # Iterate over the detected blobs
+        sprites = []
+
+        # Create a list of tuples, where each tuple contains a label and the corresponding area
+        blobs = []
         for label in np.unique(labels):
+            if label == 0:
+                continue
+            labelMask = np.zeros_like(img_gray, dtype=np.uint8)
+            labelMask[labels == label] = 255
+            contours, _ = cv2.findContours(labelMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            area = sum(cv2.contourArea(contour) for contour in contours)
+            blobs.append((label, area))
+
+        # Sort the blobs by area
+        blobs.sort(key=lambda x: x[1], reverse=True)
+
+        # Iterate over the sorted blobs
+        for label, _ in blobs:
             # If this is the background label, ignore it
             if label == 0:
                 continue
@@ -119,10 +121,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # Find contours in the label mask
             contours, _ = cv2.findContours(labelMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+
             # If the contour area is large enough, draw it on the mask
-            for c in cnts:
+            for c in contours:
                 area = cv2.contourArea(c)
-                if area > 500:  # set this as per your requirement
+                if area > 1000:  # set this as per your requirement
                     x, y, w, h = cv2.boundingRect(c)
                     cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                     # Extract the ROI from the original image
@@ -181,16 +184,16 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                     # Create a 4-channel image (3 for RGB and 1 for alpha)
                     result_with_alpha = cv2.cvtColor(test, cv2.COLOR_BGR2BGRA)
 
-                    if transparency :
-                        result_with_alpha[..., 3] = roi_mask
+                    #if transparency :
+                    #    result_with_alpha[..., 3] = roi_mask
 
-                    sprites.append(result_with_alpha)
+                    sprites.insert(0,result_with_alpha)
                     
 
                     #sprite_path = f'{output_folder}/{ROI_number}.png'
                     #cv2.imwrite(sprite_path, result_with_alpha)
 
-                    ROI_number += 1
+                    #ROI_number += 1
 
                     b, g, r, a = cv2.split(result_with_alpha)
 
@@ -203,20 +206,14 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                     output=result_with_alpha #Image.fromarray(cv2.merge((r, g, b, a)))
         #raf = img
         #pp.image=output
-        pp.image=Image.fromarray(output)
+        #pp.image=Image.fromarray(output)
 
         hh, ww = image.shape[:2]
 
         # Define the tile size
         tile_width = tile_height = hh
 
-        # Create an output image with a transparent background, of the size of the atlas
-        output = np.zeros((tile_height, tile_width * len(sprites), 4), dtype=np.uint8)
-        #output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
-
-        # Position of the image in the output image
-        # Position of the image in the output image
-        # Position of the image in the output image
+        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
         x_offset = 0
 
         # Iterate over the images and add them to the output image
@@ -237,18 +234,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             x_offset += tile_width
 
         output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
-        #output = cv2.cvtColor(output.astype('uint8'), cv2.COLOR_RGBA2BGRA)
-
 
         bg = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
 
 
-        print("output")
-        print(output)
-
-        print(Image.fromarray(output))
-
-        #pp.image=Image.fromarray(output)
+        pp.image=Image.fromarray(output)
         
         #pp.info["Magenta pixel size"] = pixel_size
 
