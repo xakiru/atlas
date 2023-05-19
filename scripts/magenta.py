@@ -197,6 +197,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
 
         # Position of the image in the output image
+        # Position of the image in the output image
         x_offset = 0
 
         # Iterate over the images and add them to the output image
@@ -219,14 +220,15 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             sprite_area = output[y_offset:y_offset+height, x_center_offset:x_center_offset+width]
 
             # Convert the alpha channel to a weight between 0 and 1
-            alpha = image[:, :, 3] / 255.0
+            alpha = image[:, :, 3].astype(np.float32) / 255.0
             alpha_inv = 1.0 - alpha
 
-            # Blend the sprite with the sprite_area using the alpha channel as weight
-            blended = cv2.addWeighted(image, alpha, sprite_area, alpha_inv, 0)
+            # Manually compute the alpha blending
+            for c in range(3):  # For each color channel
+                sprite_area[:, :, c] = (alpha * image[:, :, c] + alpha_inv * sprite_area[:, :, c]).astype(np.uint8)
 
             # Put the blended image back onto the output image
-            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = blended
+            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = sprite_area
 
             # Shift the x offset
             x_offset += tile_width
