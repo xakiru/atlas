@@ -14,7 +14,7 @@ import numpy as np
 
 
 class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
-    name = "Pixelization2"
+    name = "Magenta"
     order = 10000
     model = None
 
@@ -22,11 +22,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         with FormRow():
             with gr.Column():
                 with FormRow():
-                    enable = gr.Checkbox(False, label="Enable pixelization")
-                    upscale_after = gr.Checkbox(False, label="Keep resolution")
+                    enable = gr.Checkbox(False, label="Enable Magenta")
+                    upscale_after = gr.Checkbox(False, label="Keep Magenta")
 
             with gr.Column():
-                pixel_size = gr.Slider(minimum=1, maximum=16, step=1, label="Pixel size", value=4, elem_id="pixelization2_pixel_size")
+                pixel_size = gr.Slider(minimum=1, maximum=16, step=1, label="Pixel size", value=4, elem_id="magenta_pixel_size")
 
         return {
             "enable": enable,
@@ -40,5 +40,5 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         print(pp)
         print(pp.image)
-        pp.info["Pixelization2 pixel size"] = pixel_size
+        pp.info["Magenta pixel size"] = pixel_size
 
