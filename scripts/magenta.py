@@ -203,7 +203,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                     output=result_with_alpha #Image.fromarray(cv2.merge((r, g, b, a)))
         #raf = img
         #pp.image=output
-        #pp.image=Image.fromarray(output)
+        pp.image=Image.fromarray(output)
 
         hh, ww = image.shape[:2]
 
@@ -224,22 +224,14 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # The size of this image
             height, width = image.shape[:2]
 
-            # Check if image is not RGBA and convert it
-            if image.shape[2] == 3:  # if the image has no alpha channel
-                alpha_channel = np.ones((height, width, 1), dtype=image.dtype) * 255  # creating a new alpha channel with all values set to 255
-                image = np.concatenate((image, alpha_channel), axis=2)  # add the new alpha channel to the image
-
             # Calculate the y-coordinate to place the image at the bottom of the tile
             y_offset = tile_height - height
 
             # Calculate the x-coordinate to place the image at the center of the tile
             x_center_offset = x_offset + (tile_width - width) // 2
 
-            # Find the non-transparent pixels of the image
-            mask = image[:,:,3] > 0
-
-            # Overlay the non-transparent pixels of the image onto the output
-            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width][mask] = image[mask]
+            # Put the image on the output
+            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = image
 
             # Shift the x offset
             x_offset += tile_width
@@ -248,12 +240,15 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         #output = cv2.cvtColor(output.astype('uint8'), cv2.COLOR_RGBA2BGRA)
 
 
+        bg = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
+
+
         print("output")
         print(output)
 
         print(Image.fromarray(output))
 
-        pp.image=Image.fromarray(output)
+        #pp.image=Image.fromarray(output)
         
         #pp.info["Magenta pixel size"] = pixel_size
 
