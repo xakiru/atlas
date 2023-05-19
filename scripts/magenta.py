@@ -16,9 +16,20 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     name = "Transparency & Outline"
     order = 10000
     def ui(self):
-        transparency = gr.Checkbox(True, label="transparency")
-        outline_size = gr.Slider(minimum=0, maximum=8, step=1, Outline="Pixel size", value=1, elem_id="outline_size")
-        return [transparency, outline_size]
+        with FormRow():
+            with gr.Column():
+                with FormRow():
+                    transparency = gr.Checkbox(False, label="transparency")
+
+            with gr.Column():
+                outline_size = gr.Slider(minimum=1, maximum=16, step=1, label="Pixel size", value=1, elem_id="outline_size")
+
+        return {
+            "transparency": transparency,
+            "outline_size": outline_size,
+        }
+
+
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, transparency, outline_size):
         if not transparency:
