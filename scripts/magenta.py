@@ -204,14 +204,29 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # The size of this image
             height, width = image.shape[:2]
 
+            # Check if image is not RGBA and convert it
+            if image.shape[2] == 3:  # if the image has no alpha channel
+                alpha_channel = np.ones((height, width, 1), dtype=image.dtype) * 255  # creating a new alpha channel with all values set to 255
+                image = np.concatenate((image, alpha_channel), axis=2)  # add the new alpha channel to the image
+
             # Calculate the y-coordinate to place the image at the bottom of the tile
             y_offset = tile_height - height
 
             # Calculate the x-coordinate to place the image at the center of the tile
             x_center_offset = x_offset + (tile_width - width) // 2
 
-            # Put the image on the output
-            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = image
+            # Define the area for this sprite on the output image
+            sprite_area = output[y_offset:y_offset+height, x_center_offset:x_center_offset+width]
+
+            # Convert the alpha channel to a weight between 0 and 1
+            alpha = image[:, :, 3] / 255.0
+            alpha_inv = 1.0 - alpha
+
+            # Blend the sprite with the sprite_area using the alpha channel as weight
+            blended = cv2.addWeighted(image, alpha, sprite_area, alpha_inv, 0)
+
+            # Put the blended image back onto the output image
+            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = blended
 
             # Shift the x offset
             x_offset += tile_width
