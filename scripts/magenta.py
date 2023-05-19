@@ -8,7 +8,7 @@ from modules import images
 from modules.processing import process_images, Processed
 from modules.processing import Processed
 from modules.shared import opts, cmd_opts, state
-
+from skimage import measure
 from modules import scripts_postprocessing
 
 
@@ -84,108 +84,126 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         
             
 
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+        img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        #kernel = np.ones((3, 3), np.uint8)
+        #img_gray_eroded = cv2.erode(img_gray, kernel, iterations=1)
+        #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+        #morphed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
 
-        #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
-        #image_morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
-        # Create a kernel. The size of the kernel affects the operation; you may need to adjust this.
-        kernel = np.ones((5,5), np.uint8)
+        _, img_gray = cv2.threshold(img_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-        # Perform morphological closing
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-        # Find contours and remove small noise
-        cnts ,_ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        #cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
-        # Find contours, obtain bounding box, extract and save ROI
-        ROI_number = 0
 
-        #mask = np.full_like(image, (0,0,0))
-        #cv2.drawContours(mask,cnts, -1, (255,255,255), cv2.FILLED)
+        imshow('img',img_gray)
+        img_gray=255-img_gray
+        # Find connected components (blobs) in the image
+        labels = measure.label(img_gray, connectivity=2, background=0)
+        print(labels)
+        # Create a new image to draw the mask on
+        mask = np.zeros_like(img_gray, dtype=np.uint8)
+        cmask = np.zeros_like(img_gray, dtype=np.uint8)
+        general_mask = np.zeros_like(img_gray, dtype=np.uint8)
 
         sprites=[]
-        for c in cnts:
-            x, y, w, h = cv2.boundingRect(c)
-            cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
-            # Extract the ROI from the original image
-            ROI = image[y-4:y+h+4, x-4:x+w+4]
-            if ROI.shape[0] == 0 or ROI.shape[1] == 0:
+        # Iterate over the detected blobs
+        for label in np.unique(labels):
+            # If this is the background label, ignore it
+            if label == 0:
                 continue
-            hh, ww = ROI.shape[:2]
 
-            
-            
-            roi_gray = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
-            roi_thresh = cv2.threshold(roi_gray, 50, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-            # Morph open to remove noise
-            #roi_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-            #roi_morph = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, roi_kernel, iterations=1)
-            kernel = np.ones((3,3), np.uint8)
-            # Perform morphological closing
-            thresh = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, kernel)
+            # Construct the label mask
+            labelMask = np.zeros_like(img_gray, dtype=np.uint8)
+            labelMask[labels == label] = 255
 
-          
-            # Find contours and remove small noise
-            roi_cnts,_ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            big_contour = max(roi_cnts, key=cv2.contourArea)
+            # Find contours in the label mask
+            contours, _ = cv2.findContours(labelMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+            # If the contour area is large enough, draw it on the mask
+            for c in cnts:
+                area = cv2.contourArea(c)
+                if area > 500:  # set this as per your requirement
+                    x, y, w, h = cv2.boundingRect(c)
+                    cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
+                    # Extract the ROI from the original image
+                    ROI = image[y-4:y+h+4, x-4:x+w+4]
+                    if ROI.shape[0] == 0 or ROI.shape[1] == 0:
+                        continue
+                    hh, ww = ROI.shape[:2]
 
-            roi_mask = np.zeros_like(thresh)
-            #roi_mask = np.zeros((hh,ww), dtype=np.uint8)   
-            cv2.drawContours(roi_mask, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
-            #cv2.drawContours(roi_mask, roi_cnts, -1, (255,255,255), cv2.FILLED)
-            
-          
-            result1 = cv2.bitwise_and(ROI, ROI, mask=roi_mask)
+                    
+                    
+                    roi_gray = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
+                    roi_thresh = cv2.threshold(roi_gray, 50, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                    # Morph open to remove noise
+                    #roi_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+                    #roi_morph = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, roi_kernel, iterations=1)
+                    kernel = np.ones((3,3), np.uint8)
+                    # Perform morphological closing
+                    thresh = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, kernel)
 
-
-
-            roi_mask2 = np.zeros_like(thresh)
-            #roi_mask = np.zeros((hh,ww), dtype=np.uint8)   
-            cv2.drawContours(roi_mask2, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
-            #cv2.drawContours(roi_mask, roi_cnts, -1, (255,255,255), cv2.FILLED)
-            # Creating kernel
-            kernel2 = np.ones((4, 4), np.uint8)
-            roi_mask2 = cv2.erode(roi_mask2, kernel2)
-            roi_mask2 = cv2.GaussianBlur(roi_mask2, (5,5), 0)
+                  
+                    # Find contours and remove small noise
+                    roi_cnts,_ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    big_contour = max(roi_cnts, key=cv2.contourArea)
 
 
-            result2 = cv2.bitwise_and(ROI, ROI, mask=roi_mask2)
+                    roi_mask = np.zeros_like(thresh)
+                    #roi_mask = np.zeros((hh,ww), dtype=np.uint8)   
+                    cv2.drawContours(roi_mask, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
+                    #cv2.drawContours(roi_mask, roi_cnts, -1, (255,255,255), cv2.FILLED)
+                    
+                  
+                    result1 = cv2.bitwise_and(ROI, ROI, mask=roi_mask)
 
-          
-            inversed_roi_mask=255-roi_mask
-            magenta = np.full_like(ROI, (255,0,255))
-            background = cv2.bitwise_and(magenta, magenta, mask=inversed_roi_mask)
+                    
 
-            test = cv2.bitwise_or(result1, background)
 
-            # Create a 4-channel image (3 for RGB and 1 for alpha)
-            result_with_alpha = cv2.cvtColor(test, cv2.COLOR_BGR2BGRA)
+                    roi_mask2 = np.zeros_like(thresh)
+                    #roi_mask = np.zeros((hh,ww), dtype=np.uint8)   
+                    cv2.drawContours(roi_mask2, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
+                    #cv2.drawContours(roi_mask, roi_cnts, -1, (255,255,255), cv2.FILLED)
+                    # Creating kernel
+                    kernel2 = np.ones((4, 4), np.uint8)
+                    roi_mask2 = cv2.erode(roi_mask2, kernel2)
+                    roi_mask2 = cv2.GaussianBlur(roi_mask2, (5,5), 0)
 
-            if transparency :
-                result_with_alpha[..., 3] = roi_mask
 
-            sprites.append(result_with_alpha)
-            
+                    result2 = cv2.bitwise_and(ROI, ROI, mask=roi_mask2)
 
-            #sprite_path = f'{output_folder}/{ROI_number}.png'
-            #cv2.imwrite(sprite_path, result_with_alpha)
+                  
+                    inversed_roi_mask=255-roi_mask
+                    magenta = np.full_like(ROI, (255,0,255))
+                    background = cv2.bitwise_and(magenta, magenta, mask=inversed_roi_mask)
 
-            ROI_number += 1
+                    test = cv2.bitwise_or(result1, background)
 
-            b, g, r, a = cv2.split(result_with_alpha)
+                    # Create a 4-channel image (3 for RGB and 1 for alpha)
+                    result_with_alpha = cv2.cvtColor(test, cv2.COLOR_BGR2BGRA)
 
-            
-            #imshow("",result_with_alpha)
-            #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
+                    if transparency :
+                        result_with_alpha[..., 3] = roi_mask
 
-            #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
-            #raf.append(Image.fromarray(cv2.merge((r, g, b, a))))
-            output=result_with_alpha #Image.fromarray(cv2.merge((r, g, b, a)))
+                    sprites.append(result_with_alpha)
+                    
+
+                    #sprite_path = f'{output_folder}/{ROI_number}.png'
+                    #cv2.imwrite(sprite_path, result_with_alpha)
+
+                    ROI_number += 1
+
+                    b, g, r, a = cv2.split(result_with_alpha)
+
+                    
+                    #imshow("",result_with_alpha)
+                    #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
+
+                    #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
+                    #raf.append(Image.fromarray(cv2.merge((r, g, b, a))))
+                    output=result_with_alpha #Image.fromarray(cv2.merge((r, g, b, a)))
         #raf = img
         #pp.image=output
+        #pp.image=Image.fromarray(output)
 
         hh, ww = image.shape[:2]
 
@@ -196,6 +214,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         output = np.zeros((tile_height, tile_width * len(sprites), 4), dtype=np.uint8)
         output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
 
+        # Position of the image in the output image
         # Position of the image in the output image
         # Position of the image in the output image
         x_offset = 0
@@ -216,19 +235,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # Calculate the x-coordinate to place the image at the center of the tile
             x_center_offset = x_offset + (tile_width - width) // 2
 
-            # Define the area for this sprite on the output image
-            sprite_area = output[y_offset:y_offset+height, x_center_offset:x_center_offset+width]
+            # Find the non-transparent pixels of the image
+            mask = image[:,:,3] > 0
 
-            # Convert the alpha channel to a weight between 0 and 1
-            alpha = image[:, :, 3].astype(np.float32) / 255.0
-            alpha_inv = 1.0 - alpha
-
-            # Manually compute the alpha blending
-            for c in range(3):  # For each color channel
-                sprite_area[:, :, c] = (alpha * image[:, :, c] + alpha_inv * sprite_area[:, :, c]).astype(np.uint8)
-
-            # Put the blended image back onto the output image
-            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = sprite_area
+            # Overlay the non-transparent pixels of the image onto the output
+            output[y_offset:y_offset+height, x_center_offset:x_center_offset+width][mask] = image[mask]
 
             # Shift the x offset
             x_offset += tile_width
