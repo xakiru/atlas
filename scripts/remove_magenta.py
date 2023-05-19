@@ -10,6 +10,7 @@ from modules.processing import Processed
 from modules.shared import opts, cmd_opts, state
 from skimage import measure
 from modules import scripts_postprocessing
+from modules.ui_components import FormRow
 
 
 
