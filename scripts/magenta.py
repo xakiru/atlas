@@ -76,10 +76,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
         #morphed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
         _, img_gray = cv2.threshold(img_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-
-
-
-        img_gray=255-img_gray
+        img_gray=255-img_gray   
         # Find connected components (blobs) in the image
         labels = measure.label(img_gray, connectivity=2, background=0)
         # Create a new image to draw the mask on
