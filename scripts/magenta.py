@@ -73,7 +73,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         
             
 
-       img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #kernel = np.ones((3, 3), np.uint8)
         #img_gray_eroded = cv2.erode(img_gray, kernel, iterations=1)
         #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
