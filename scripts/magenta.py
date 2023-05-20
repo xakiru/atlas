@@ -209,9 +209,10 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         if (save_magenta):
             images.save_image(output,basename= "magenta_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
-            
+
         if (forward_magenta):
             pp.image=output 
         
+        pp.info["magenta"] = remove_magenta
         pp.info["magenta"] = remove_magenta
 
