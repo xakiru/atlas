@@ -56,7 +56,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=new_image
         
 
-        images.save_image(new_image, pp.outpath_samples, "additional_", proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
-        
+        images.save_image(new_image,basename= "final_" ,  extension=opts.samples_format, info= pp.info) 
+       
 
 
