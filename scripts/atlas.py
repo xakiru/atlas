@@ -110,78 +110,38 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
                     hh, ww = ROI.shape[:2]
 
                     
-                    
                     roi_gray = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
                     roi_thresh = cv2.threshold(roi_gray, 50, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-                    # Morph open to remove noise
-                    #roi_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-                    #roi_morph = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, roi_kernel, iterations=1)
                     kernel = np.ones((3,3), np.uint8)
-                    # Perform morphological closing
                     thresh = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, kernel)
-
-                  
-                    # Find contours and remove small noise
                     roi_cnts,_ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                     big_contour = max(roi_cnts, key=cv2.contourArea)
 
-
-                    roi_mask = np.zeros_like(thresh)
-                    #roi_mask = np.zeros((hh,ww), dtype=np.uint8)   
-                    cv2.drawContours(roi_mask, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
-                    #cv2.drawContours(roi_mask, roi_cnts, -1, (255,255,255), cv2.FILLED)
-                    
-                  
-                    result1 = cv2.bitwise_and(ROI, ROI, mask=roi_mask)
-
-                    
+                    roi_mask = np.zeros_like(thresh)  
+                    cv2.drawContours(roi_mask, [big_contour], -1, (255, 0, 255), thickness=cv2.FILLED) 
 
 
-                    roi_mask2 = np.zeros_like(thresh)
-                    #roi_mask = np.zeros((hh,ww), dtype=np.uint8)   
+                    roi_mask2 = np.zeros_like(thresh) 
                     cv2.drawContours(roi_mask2, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
-                    #cv2.drawContours(roi_mask, roi_cnts, -1, (255,255,255), cv2.FILLED)
-                    # Creating kernel
-                    kernel2 = np.ones((4, 4), np.uint8)
+                    kernel2 = np.ones((5, 5), np.uint8)
                     roi_mask2 = cv2.erode(roi_mask2, kernel2)
-                    roi_mask2 = cv2.GaussianBlur(roi_mask2, (5,5), 0)
+                    roi_mask2 = cv2.GaussianBlur(roi_mask2, (3,3), 0)
 
 
-                    result2 = cv2.bitwise_and(ROI, ROI, mask=roi_mask2)
-
+                    clean_roi = cv2.bitwise_and(ROI, ROI, mask=roi_mask2)
                   
                     inversed_roi_mask=255-roi_mask
-                    magenta = np.full_like(ROI, (255,255,255))
-                    background = cv2.bitwise_and(magenta, magenta, mask=inversed_roi_mask)
+                    background = np.full_like(ROI, (255,255,255))
+                    empty_background = cv2.bitwise_and(background, background, mask=inversed_roi_mask)
 
-                    result_without_alpha = cv2.bitwise_or(result1, background)
+                    result_without_alpha = cv2.bitwise_or(clean_roi, empty_background)
 
-                    # Create a 4-channel image (3 for RGB and 1 for alpha)
                     result_with_alpha = cv2.cvtColor(result_without_alpha, cv2.COLOR_BGR2BGRA)
 
                     #if transparency :
                     #    result_with_alpha[..., 3] = roi_mask
 
                     sprites.insert(0,result_without_alpha)
-                    
-
-                    #sprite_path = f'{output_folder}/{ROI_number}.png'
-                    #cv2.imwrite(sprite_path, result_with_alpha)
-
-                    #ROI_number += 1
-
-                    b, g, r, a = cv2.split(result_with_alpha)
-
-                    
-                    #imshow("",result_with_alpha)
-                    #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
-
-                    #images.save_image(Image.fromarray(cv2.merge((r, g, b, a))), p.outpath_samples, basename + "_" + str(ROI_number), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
-                    #raf.append(Image.fromarray(cv2.merge((r, g, b, a))))
-                    output=result_with_alpha #Image.fromarray(cv2.merge((r, g, b, a)))
-        #raf = img
-        #pp.image=output
-        #pp.image=Image.fromarray(output)
 
         hh, ww = image.shape[:2]
 
