@@ -42,11 +42,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if not enable:
             return
 
-        print(pp)
+        print(pp.info)
         if (save_intermediate):
-            images.save_image(pp.image, pp.outpath_samples, "inter_" , proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
+            images.save_image(pp.image,basename= "inter_" ,  extension=opts.samples_format, info= proc.info) 
         
-
+            
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
         img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #kernel = np.ones((3, 3), np.uint8)
@@ -209,8 +209,8 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
 
         if (save_magenta):
-            images.save_image(Image.fromarray(output), pp.outpath_samples, "magenta_", proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p) 
-        
+            images.save_image(Image.fromarray(output),basename= "magenta_" ,  extension=opts.samples_format, info= proc.info) 
+            
         if (forward_magenta):
             pp.image=Image.fromarray(output) 
         
