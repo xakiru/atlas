@@ -205,8 +205,8 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         
         b, g, r, a = cv2.split(output)
-        output = Image.fromarray(cv2.merge((r, g, b, a)))
-
+        #output = Image.fromarray(cv2.merge((r, g, b, a)))
+        output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
         if (save_magenta):
             images.save_image(output,basename= "magenta_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
 
