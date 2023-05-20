@@ -30,33 +30,36 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         print(pp.info)
         # Convert to NumPy array
-        data = np.array(pp.image)
+        img = pp.image
 
-        # Create a new 4-channel image (RGBA) with the same shape as the original image
-        new_data = np.zeros(data.shape, dtype=np.uint8)
+        # Ensure the image has an alpha channel
+        img = img.convert("RGBA")
 
-        # Copy the RGB values and alpha channel
-        new_data[..., :3] = data[..., :3]
-        new_data[..., 3] = data[..., 3]
+        # Get the color of the pixel at (0, 0) - assuming this is the background
+        background_color = img.getpixel((0, 0))
 
-        # Define the magenta color
-        magenta = np.array([255, 0, 255, 255], dtype=np.uint8)
+        # Get the image data
+        data = img.getdata()
 
-        # Find where the magenta pixels are
-        magenta_pixels = (data == magenta).all(axis=-1)
-
-        # Set alpha to 0 (transparent) where the image is magenta
-        new_data[magenta_pixels] = [255, 0, 255, 0]  # RGB values won't matter here as alpha is set to 0
-
-        # Convert back to PIL Image
-        new_image = Image.fromarray(new_data, 'RGBA')
+        # Create a new image data
+        new_data = []
+        for item in data:
+            # Change all white (also shades of whites)
+            # pixels to transparent
+            if item[0] in list(range(200, 256)):
+                new_data.append((255, 255, 255, 0))
+            else:
+                new_data.append(item)
+                
+        # Update image data
+        img.putdata(new_data)
 
         # If you want to save the image, you can do so with:
         # new_image.save('output.png')
-        pp.image=new_image
+        pp.image=img
         
 
-        images.save_image(new_image,basename= "final_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
+        images.save_image(img,basename= "final_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
        
 
 

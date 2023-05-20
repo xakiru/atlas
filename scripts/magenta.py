@@ -146,7 +146,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
                   
                     inversed_roi_mask=255-roi_mask
-                    magenta = np.full_like(ROI, (255,0,255))
+                    magenta = np.full_like(ROI, (255,255,255)) #magenta
                     background = cv2.bitwise_and(magenta, magenta, mask=inversed_roi_mask)
 
                     test = cv2.bitwise_or(result1, background)
@@ -183,7 +183,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         # Define the tile size
         tile_width = tile_height = hh
 
-        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
+        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 255, 255, 255], dtype=np.uint8) #magenta
         x_offset = 0
 
         # Iterate over the images and add them to the output image
@@ -203,10 +203,9 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # Shift the x offset
             x_offset += tile_width
 
-        output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
-
-        bg = np.full((tile_height, tile_width * len(sprites), 4), [255, 0, 255, 255], dtype=np.uint8)
-
+        
+        b, g, r, a = cv2.split(output)
+        output = Image.fromarray(cv2.merge((r, g, b, a)))
 
         if (save_magenta):
             images.save_image(Image.fromarray(output),basename= "magenta_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
