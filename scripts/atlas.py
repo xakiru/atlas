@@ -23,7 +23,6 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
         with FormRow():
             with gr.Column():
                 enable = gr.Checkbox(False, label="Enable Atlas")
-                remove_background = gr.Checkbox(False, label="Remove Background")
 
             with gr.Column():
                 with FormRow():
@@ -35,10 +34,9 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
             "save_input": save_input,
             "save_atlas": save_atlas,
             "forward_atlas": forward_atlas,
-            "remove_background": remove_background,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_input, save_atlas, forward_atlas,remove_background):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_input, save_atlas, forward_atlas):
         if not enable:
             return
 
@@ -230,7 +228,5 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
             images.save_image(pil_output,basename= "atlas_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         if (forward_atlas):
-            pp.image=pil_output 
-        
-        pp.info["extension_atlas_remove_bg"] = remove_background
+            pp.image=pil_output
 

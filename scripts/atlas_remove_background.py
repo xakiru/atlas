@@ -20,27 +20,26 @@ class ScriptPostprocessingAtlasR(scripts_postprocessing.ScriptPostprocessing):
     model = None
 
     def ui(self):
-        return {}
+        with FormRow():
+            remove_background = gr.Checkbox(False, label="Remove Atlas Background")
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage):
-        if "extension_atlas_remove_bg" in pp.info:
-            print("extension_atlas_remove_bg in<<<<")
-        else
-            print("extension_atlas_remove_bg not in <<<<")
+        return {
+            "remove_background": remove_background,
+        }
 
-        if "extension_atlas_remove_bg" not in pp.info:
-            print("no extension_atlas_remove_bg")
+    def process(self, pp: scripts_postprocessing.PostprocessedImage,remove_background):
+        if not remove_background:
             return
-
-        pil_image=remove_background(pp.image)
+            
+        pil_image=remove_bg(pp.image)
         images.save_image(pil_image,basename= "transparent_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
         pp.image=pil_image
         
 
 
-def remove_background(pil_image):
+def remove_bg(pil_image):
     # convert the PIL image to OpenCV format (numpy array)
-    img = cv2.cvtColor(np.array(pil_output), cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
     # Create a grayscale version of the image
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
