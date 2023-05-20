@@ -23,7 +23,13 @@ class ScriptPostprocessingAtlasR(scripts_postprocessing.ScriptPostprocessing):
         return {}
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage):
+        if "extension_atlas_remove_bg" in pp.info:
+            print("extension_atlas_remove_bg in<<<<")
+        else
+            print("extension_atlas_remove_bg not in <<<<")
+
         if "extension_atlas_remove_bg" not in pp.info:
+            print("no extension_atlas_remove_bg")
             return
 
         pil_image=remove_background(pp.image)
