@@ -47,6 +47,7 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
             images.save_image(pp.image,basename= "inter_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
         
             
+
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
         img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         #kernel = np.ones((3, 3), np.uint8)
@@ -217,12 +218,14 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
 
         
-        b, g, r, a = cv2.split(output)
+        #b, g, r, a = cv2.split(output)
+        #pil_output = Image.fromarray(cv2.merge((r, g, b)))
+
         #pil_output = Image.fromarray(cv2.merge((r, g, b, a)))
-        pil_output = Image.fromarray(cv2.merge((r, g, b)))
         #output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
         #pil_output=Image.fromarray(output)
 
+        pil_output=Image.fromarray(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
         if (save_atlas):
             images.save_image(pil_output,basename= "atlas_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 

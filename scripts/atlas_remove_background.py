@@ -33,7 +33,7 @@ class ScriptPostprocessingAtlasR(scripts_postprocessing.ScriptPostprocessing):
 
 def remove_background(pil_image):
     # convert the PIL image to OpenCV format (numpy array)
-    img = np.array(pil_image.convert('RGB')) 
+    img = cv2.cvtColor(np.array(pil_output), cv2.COLOR_RGB2BGR)
 
     # Create a grayscale version of the image
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
