@@ -46,7 +46,7 @@ def remove_bg(pil_image):
 
     # Threshold the image: this will create a binary image where
     # white pixels are those that were greater than 254 and black pixels the rest.
-    _, thresh = cv2.threshold(gray, 254, 255, cv2.THRESH_BINARY_INV)
+    _, thresh = cv2.threshold(gray, 230, 255, cv2.THRESH_BINARY_INV)
 
     # Find contours in the thresholded image
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
