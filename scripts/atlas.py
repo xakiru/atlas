@@ -218,7 +218,8 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
         
         b, g, r, a = cv2.split(output)
-        pil_output = Image.fromarray(cv2.merge((r, g, b, a)))
+        #pil_output = Image.fromarray(cv2.merge((r, g, b, a)))
+        pil_output = Image.fromarray(cv2.merge((r, g, b)))
         #output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
         #pil_output=Image.fromarray(output)
 
