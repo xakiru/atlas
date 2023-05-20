@@ -28,38 +28,37 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         else:
             return
 
-        print(pp.info)
-        # Convert to NumPy array
-        img = pp.image
-
-        # Ensure the image has an alpha channel
-        img = img.convert("RGBA")
-
-        # Get the color of the pixel at (0, 0) - assuming this is the background
-        background_color = img.getpixel((0, 0))
-
-        # Get the image data
-        data = img.getdata()
-
-        # Create a new image data
-        new_data = []
-        for item in data:
-            # Change all white (also shades of whites)
-            # pixels to transparent
-            if item[0] in list(range(200, 256)):
-                new_data.append((255, 255, 255, 0))
-            else:
-                new_data.append(item)
-                
-        # Update image data
-        img.putdata(new_data)
-
-        # If you want to save the image, you can do so with:
-        # new_image.save('output.png')
-        pp.image=img
+        pp.image=remove_background(pp.image)
         
-
-        images.save_image(img,basename= "final_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
+        images.save_image(pp.image,basename= "final_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
        
 
 
+def remove_background(pil_image):
+    # convert the PIL image to OpenCV format (numpy array)
+    img = np.array(pil_image.convert('RGB')) 
+
+    # Create a grayscale version of the image
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Threshold the image: this will create a binary image where
+    # white pixels are those that were greater than 254 and black pixels the rest.
+    _, thresh = cv2.threshold(gray, 254, 255, cv2.THRESH_BINARY_INV)
+
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an empty mask to fill in the found contours
+    mask = np.zeros_like(thresh)
+
+    # Draw white filled contours on the black mask
+    cv2.drawContours(mask, contours, -1, (255), thickness=cv2.FILLED)
+
+    # Create a 4-channel image (RGBA) from the original and the mask
+    rgba = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+    rgba[:, :, 3] = mask
+
+    # Convert the image back to PIL format
+    pil_image = Image.fromarray(cv2.cvtColor(rgba, cv2.COLOR_BGRA2RGBA))
+
+    return pil_image
