@@ -218,12 +218,12 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
         
         b, g, r, a = cv2.split(output)
-        #output = Image.fromarray(cv2.merge((r, g, b, a)))
-        output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
+        pil_output = Image.fromarray(cv2.merge((r, g, b, a)))
+        #output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
+        #pil_output=Image.fromarray(output)
 
-        pil_output=Image.fromarray(output)
         if (save_atlas):
-            images.save_image(Image.fromarray(output),basename= "magenta_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(pil_output,basename= "atlas_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         if (forward_atlas):
             pp.image=pil_output 
