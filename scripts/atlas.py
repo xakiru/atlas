@@ -44,7 +44,7 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
         print(pp.info)
         if (save_input):
-            images.save_image(pp.image,basename= "inter_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(pp.image,basename= "input_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
         
             
 
@@ -156,15 +156,15 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
                     magenta = np.full_like(ROI, (255,255,255))
                     background = cv2.bitwise_and(magenta, magenta, mask=inversed_roi_mask)
 
-                    test = cv2.bitwise_or(result1, background)
+                    result_without_alpha = cv2.bitwise_or(result1, background)
 
                     # Create a 4-channel image (3 for RGB and 1 for alpha)
-                    result_with_alpha = cv2.cvtColor(test, cv2.COLOR_BGR2BGRA)
+                    result_with_alpha = cv2.cvtColor(result_without_alpha, cv2.COLOR_BGR2BGRA)
 
                     #if transparency :
                     #    result_with_alpha[..., 3] = roi_mask
 
-                    sprites.insert(0,result_with_alpha)
+                    sprites.insert(0,result_without_alpha)
                     
 
                     #sprite_path = f'{output_folder}/{ROI_number}.png'
@@ -192,7 +192,7 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
         # Create an output image with a transparent background, of the size of the atlas
         #output = np.zeros((tile_height, tile_width * len(sprites), 4), dtype=np.uint8)
-        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 255, 255, 255], dtype=np.uint8)
+        output = np.full((tile_height, tile_width * len(sprites), 3), [255, 255, 255], dtype=np.uint8)
 
         # Position of the image in the output image
         # Position of the image in the output image

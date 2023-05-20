@@ -26,9 +26,10 @@ class ScriptPostprocessingAtlasR(scripts_postprocessing.ScriptPostprocessing):
         if "extension_atlas_remove_bg" not in pp.info:
             return
 
-        pp.image=remove_background(pp.image)
-        images.save_image(pp.image,basename= "transparent_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-       
+        pil_image=remove_background(pp.image)
+        images.save_image(pil_image,basename= "transparent_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+        pp.image=pil_image
+        
 
 
 def remove_background(pil_image):
