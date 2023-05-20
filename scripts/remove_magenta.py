@@ -30,7 +30,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         pp.image=remove_background(pp.image)
         
-        images.save_image(pp.image,basename= "final_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
+        images.save_image(pp.image,basename= "final_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
        
 
 
