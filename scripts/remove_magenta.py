@@ -23,11 +23,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         return {}
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage):
-        if not pp.info["magenta"]:
+        if "magenta" in pp.info:
+            print(pp.info["magenta"])
+        else:
             return
 
-
-        print(pp)
+        print(pp.info)
         # Convert to NumPy array
         data = np.array(pp.image)
 
