@@ -14,8 +14,8 @@ from modules.ui_components import FormRow
 
 
 
-class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
-    name = "Remove Magenta"
+class ScriptPostprocessingAtlasR(scripts_postprocessing.ScriptPostprocessing):
+    name = "Atlas Background Removal"
     order = 9001
     model = None
 
@@ -23,14 +23,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         return {}
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage):
-        if "magenta" in pp.info:
-            print(pp.info["magenta"])
-        else:
+        if "extension_atlas_remove_bg" not in pp.info:
             return
 
         pp.image=remove_background(pp.image)
-        
-        images.save_image(pp.image,basename= "final_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+        images.save_image(pp.image,basename= "transparent_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
        
 
 

@@ -14,37 +14,37 @@ from modules.ui_components import FormRow
 
 
 
-class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
-    name = "Magenta"
+class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
+    name = "Atlas"
     order = 9000
     model = None
 
     def ui(self):
         with FormRow():
             with gr.Column():
-                enable = gr.Checkbox(False, label="Enable Magenta")
-                remove_magenta = gr.Checkbox(False, label="Remove Magenta Module")
+                enable = gr.Checkbox(False, label="Enable Atlas")
+                remove_background = gr.Checkbox(False, label="Remove Background")
 
             with gr.Column():
                 with FormRow():
-                    save_intermediate = gr.Checkbox(False, label="Save intermediate")
-                    save_magenta = gr.Checkbox(False, label="Save Magenta")
-                    forward_magenta = gr.Checkbox(True, label="Forward Magenta")
+                    save_input = gr.Checkbox(False, label="Save Input")
+                    save_atlas = gr.Checkbox(False, label="Save Atlas")
+                    forward_atlas = gr.Checkbox(True, label="Forward Atlas")
         return {
             "enable": enable,
-            "save_intermediate": save_intermediate,
-            "save_magenta": save_magenta,
-            "forward_magenta": forward_magenta,
-            "remove_magenta": remove_magenta,
+            "save_input": save_input,
+            "save_atlas": save_atlas,
+            "forward_atlas": forward_atlas,
+            "remove_background": remove_background,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_intermediate, save_magenta, forward_magenta,remove_magenta):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_input, save_atlas, forward_atlas,remove_background):
         if not enable:
             return
 
         print(pp.info)
-        if (save_intermediate):
-            images.save_image(pp.image,basename= "inter_" ,path=opts.outdir_save,  extension=opts.samples_format, info= pp.info) 
+        if (save_input):
+            images.save_image(pp.image,basename= "inter_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
         
             
         image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
@@ -53,10 +53,16 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         #img_gray_eroded = cv2.erode(img_gray, kernel, iterations=1)
         #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
         #morphed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
+
         _, img_gray = cv2.threshold(img_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-        img_gray=255-img_gray   
+
+
+
+
+        img_gray=255-img_gray
         # Find connected components (blobs) in the image
         labels = measure.label(img_gray, connectivity=2, background=0)
+
         # Create a new image to draw the mask on
         mask = np.zeros_like(img_gray, dtype=np.uint8)
         cmask = np.zeros_like(img_gray, dtype=np.uint8)
@@ -146,7 +152,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
                   
                     inversed_roi_mask=255-roi_mask
-                    magenta = np.full_like(ROI, (255,255,255)) #magenta
+                    magenta = np.full_like(ROI, (255,255,255))
                     background = cv2.bitwise_and(magenta, magenta, mask=inversed_roi_mask)
 
                     test = cv2.bitwise_or(result1, background)
@@ -183,7 +189,13 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         # Define the tile size
         tile_width = tile_height = hh
 
-        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 255, 255, 255], dtype=np.uint8) #magenta
+        # Create an output image with a transparent background, of the size of the atlas
+        #output = np.zeros((tile_height, tile_width * len(sprites), 4), dtype=np.uint8)
+        output = np.full((tile_height, tile_width * len(sprites), 4), [255, 255, 255, 255], dtype=np.uint8)
+
+        # Position of the image in the output image
+        # Position of the image in the output image
+        # Position of the image in the output image
         x_offset = 0
 
         # Iterate over the images and add them to the output image
@@ -203,18 +215,18 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             # Shift the x offset
             x_offset += tile_width
 
+
         
         b, g, r, a = cv2.split(output)
         #output = Image.fromarray(cv2.merge((r, g, b, a)))
         output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
 
         pil_output=Image.fromarray(output)
-        if (save_magenta):
+        if (save_atlas):
             images.save_image(Image.fromarray(output),basename= "magenta_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
-        if (forward_magenta):
+        if (forward_atlas):
             pp.image=pil_output 
         
-        pp.info["magenta"] = remove_magenta
-        pp.info["magenta"] = remove_magenta
+        pp.info["extension_atlas_remove_bg"] = remove_background
 
