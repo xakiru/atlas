@@ -459,6 +459,7 @@ def create_animation(pil_image):
                 #    result_with_alpha[..., 3] = roi_mask
 
                 sprites.insert(0,result_without_alpha)
+                sprites.insert(0,ROI)
 
     hh, ww = image.shape[:2]
 
@@ -625,7 +626,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                     images.save_image(image,basename= "input_"+str(image_index) ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
 
-                atlas_output=create_atlas(image)
+                #atlas_output=create_atlas(image)
                 pp.image=atlas_output
 
                 if (save_atlas):
