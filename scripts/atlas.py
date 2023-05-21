@@ -283,11 +283,6 @@ class Script(scripts.Script):
 
         return_images=[]
         for i in range(len(proc.images)):
-            
-            print("i")
-            print(i)
-            print("len")
-            print(len(proc.images))
             if (i==0):
                 if(len(proc.images)>1):
                     continue
