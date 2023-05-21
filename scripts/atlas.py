@@ -461,7 +461,7 @@ def create_animation(pil_image):
                 #if transparency :
                 #    result_with_alpha[..., 3] = roi_mask
 
-                sprites.insert(0,result_without_alpha)
+                #sprites.insert(0,result_without_alpha)
                 sprites.insert(0,ROI)
                 if count_contours >= max_contours:
                     break
