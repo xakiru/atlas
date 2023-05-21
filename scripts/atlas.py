@@ -284,22 +284,21 @@ class Script(scripts.Script):
             
 
             if (save_input):
-                images.save_image(proc.images[i], p.outpath_samples,  "input_" , proc.seed + i, None, opts.samples_format, info= proc.info, p=p)
-                
+                images.save_image(proc.images[i], path=p.outpath_samples,basename= str(proc.seed)+"input_" ,  extension=opts.samples_format, info= pp.info) 
+
 
             pil_output=create_atlas(proc.images[i])
             
             if (save_atlas):
-                #return_images.append(pil_output)
-                images.save_image(pil_output, p.outpath_samples,  "atlas_" , proc.seed + i, None, opts.samples_format, info= proc.info, p=p)
-                
+                images.save_image(pil_output, path=p.outpath_samples,basename= str(proc.seed)+"_atlas_" ,  extension=opts.samples_format, info= pp.info) 
+
             
 
             trans_output=remove_bg(pil_output)
 
             if (save_transparent):
-                images.save_image(trans_output, p.outpath_samples,  "trans_" + str(i), proc.seed + i, None, opts.samples_format, info= proc.info, p=p)
-                
+                images.save_image(trans_output, path=p.outpath_samples,basename= str(proc.seed)+"trans_" ,  extension=opts.samples_format, info= pp.info) 
+
             return_images.append(trans_output)
             #images.save_image(pil_output, p.outpath_samples, "trans_" +str(proc.seed) + "_" + str(i), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
             
