@@ -22,5 +22,8 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
     def process(self, pp: scripts_postprocessing.PostprocessedImage, enable):
         if not enable:
             return
-        
+        for item in pp.info:
+            print(item)
+        print(pp.info["seed"])
+        print(pp.info)
         images.save_image(pp.image,basename= str(pp.seed)+"-original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
