@@ -181,6 +181,33 @@ def to_image(tensor, pixel_size, upscale_after):
 
 
 
+def create_gif(atlas_image, frame_width, frame_height):
+    # Calculate the number of frames in each column
+    num_frames = atlas_image.width // frame_width
+
+    # Calculate the number of columns
+    num_columns = atlas_image.width // frame_width
+
+    # Create a new list of lists to hold vertically looped images for each column
+    looped_images = []
+    for col in range(num_columns):
+        column_images = []
+        for frame in range(num_frames):
+            # Crop the current frame from the atlas image
+            left = col * frame_width
+            upper = frame * frame_height
+            right = left + frame_width
+            lower = upper + frame_height
+            cropped_image = atlas_image.crop((left, upper, right, lower))
+
+            # Append the cropped image to the column images list
+            column_images.append(cropped_image)
+
+        # Append the column images list to the looped images list
+        looped_images.append(column_images)
+
+    return looped_images
+
 def remove_bg(pil_image):
     # convert the PIL image to OpenCV format (numpy array)
     img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
@@ -522,4 +549,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
+        animations = create_gif(pixel_output, 128, 128)
+        column_index = 0
+
+        for column in animations:
+            # Process each column animation, which is a list of vertically looped images
+            output_path = f'{opts.outdir_img2img_samples}_animation_{column_index}.gif'  # Specify the output path for the GIF file
+            column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=500, loop=0)
+            column_index += 1
 
