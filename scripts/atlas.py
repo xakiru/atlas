@@ -92,6 +92,7 @@ def remove_bg(pil_image):
 
 
 
+
 def create_atlas(pil_image):
 
     image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
@@ -101,7 +102,7 @@ def create_atlas(pil_image):
     #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
     #morphed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
 
-    _, img_gray = cv2.threshold(img_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    _, img_gray = cv2.threshold(img_gray, 224, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
 
 
@@ -148,12 +149,12 @@ def create_atlas(pil_image):
         # If the contour area is large enough, draw it on the mask
         for c in contours:
             area = cv2.contourArea(c)
-            if area > 300:  # set this as per your requirement
+            if area > 200:  # set this as per your requirement
                 x, y, w, h = cv2.boundingRect(c)
-                #cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
+                cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                 # Extract the ROI from the original image
-                #ROI = image[y-4:y+h+4, x-4:x+w+4]
-                ROI = image[y:y+h, x:x+w]
+                ROI = image[y-4:y+h+4, x-4:x+w+4]
+                #ROI = image[y:y+h, x:x+w]
                 
                 if ROI.shape[0] == 0 or ROI.shape[1] == 0:
                     continue
@@ -161,14 +162,14 @@ def create_atlas(pil_image):
 
                 
                 roi_gray = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
-                roi_thresh = cv2.threshold(roi_gray, 50, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                roi_thresh = cv2.threshold(roi_gray, 224, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
                 kernel = np.ones((3,3), np.uint8)
                 thresh = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, kernel)
                 roi_cnts,_ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                 big_contour = max(roi_cnts, key=cv2.contourArea)
 
                 roi_mask = np.zeros_like(thresh)  
-                cv2.drawContours(roi_mask, [big_contour], -1, (255, 0, 255), thickness=cv2.FILLED) 
+                cv2.drawContours(roi_mask, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
 
 
                 roi_mask2 = np.zeros_like(thresh) 
@@ -178,7 +179,7 @@ def create_atlas(pil_image):
                 roi_mask2 = cv2.GaussianBlur(roi_mask2, (3,3), 0)
 
 
-                clean_roi = cv2.bitwise_and(ROI, ROI, mask=roi_mask2)
+                clean_roi = cv2.bitwise_and(ROI, ROI, mask=roi_mask)
               
                 inversed_roi_mask=255-roi_mask
                 background = np.full_like(ROI, (255,255,255))
@@ -236,8 +237,6 @@ def create_atlas(pil_image):
     pil_output=Image.fromarray(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
 
     return pil_output
-
-
 
 class Script(scripts.Script):  
 
