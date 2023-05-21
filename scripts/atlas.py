@@ -294,8 +294,8 @@ def create_animation(pil_image):
     # Sort the blobs by area
     blobs.sort(key=lambda x: x[1], reverse=True)
 
-    max_contours = 2  # Maximum number of contours to consider
-    count_contours = 0 ximum number of contours to consider
+    max_contours = 2  
+    count_contours = 0 
     used_contours = False
     # Iterate over the sorted blobs
     for label, _ in blobs:
