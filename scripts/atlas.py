@@ -513,11 +513,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         animated_images=create_animation(pp.image)
         pixel_images=[]
         trans_images=[]
+        file_id=0
 
         if (save_original):
-            images.save_image(pp.image,basename= "original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info)
+            file_id, _=images.save_image(pp.image,basename= "original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info)
         if (save_atlas):
-            images.save_image(remove_bg(animated_images[0]),basename= "atlas" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            file_id, _=images.save_image(remove_bg(animated_images[0]),basename= "atlas" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
 
         if self.model is None:
@@ -553,19 +554,19 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         trans_output=concatenate_images(trans_images)
         
         if (save_pixelization):
-            images.save_image(pixel_output,basename= "pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            file_id, _=images.save_image(pixel_output,basename= "pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
-        test=""
+
         if (save_transparent):
-            test, _=images.save_image(trans_output,basename= "trans_pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-        file_id=extract_number_from_filename(test)
+            file_id, _=images.save_image(trans_output,basename= "trans_pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+        
 
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
         
 
-
+        
         if save_gifs:
             animations = create_gif(pixel_output, 128, 128)
             column_index = 0
@@ -573,7 +574,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
             for column in animations:
                 # Process each column animation, which is a list of vertically looped images
-                 images.get_next_sequence_number(opts.outdir_img2img_samples, f'_animation_{column_index}.gif') 
+                file_id=extract_number_from_filename(file_id) 
                 output_path = opts.outdir_img2img_samples, f'_animation_{column_index}-{file_id:04d}.gif' # Specify the output path for the GIF file
                 column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=300, loop=0)
                 column_index += 1
