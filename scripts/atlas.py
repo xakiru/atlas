@@ -285,7 +285,7 @@ class Script(scripts.Script):
         for i in range(len(proc.images)):
             
             if (i==0):
-                return proc
+                continue
 
             if (save_input):
                 images.save_image(proc.images[i], path=p.outpath_samples,basename= str(proc.seed)+"-input" ,  extension=opts.samples_format, info= proc.info) 
