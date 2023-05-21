@@ -418,13 +418,13 @@ def create_animation(pil_image):
         max_height_stretch=6
         if height<42 :
             max_height_stretch= 2
-        else if height < 84 :
+        elif height < 84 :
             max_height_stretch= 4
 
         max_width_stretch=8
         if width<42 :
             max_width_stretch= 4
-        else if width < 84 :
+        elif width < 84 :
             max_width_stretch= 6
 
         stretched_width = width-max_width_stretch
@@ -454,13 +454,13 @@ def create_animation(pil_image):
         max_height_stretch=16
         if height<42 :
             max_height_stretch= 8
-        else if height < 84 :
+        elif height < 84 :
             max_height_stretch= 10
 
         max_width_stretch=8
         if width<42 :
             max_width_stretch= 4
-        else if width < 84 :
+        elif width < 84 :
             max_width_stretch= 6
 
         stretched_width = width+max_width_stretch
