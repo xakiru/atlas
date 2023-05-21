@@ -210,153 +210,22 @@ def remove_bg(pil_image):
 
     return pil_image
 
+def concatenate_images(images):
+    # Determine output dimensions
+    output_width = max(image.width for image in images)
+    output_height = sum(image.height for image in images)
 
+    # Create a new blank image with transparent background
+    output_image = Image.new('RGBA', (output_width, output_height), (0, 0, 0, 0))
 
+    # Paste the images vertically
+    y_offset = 0
+    for image in images:
+        output_image.paste(image, (0, y_offset))
+        y_offset += image.height
 
-def create_atlas(pil_image):
+    return output_image
 
-    image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    #kernel = np.ones((3, 3), np.uint8)
-    #img_gray_eroded = cv2.erode(img_gray, kernel, iterations=1)
-    #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
-    #morphed = cv2.morphologyEx(img_gray, cv2.MORPH_CLOSE, kernel)
-
-    _, img_gray = cv2.threshold(img_gray, 224, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-
-
-
-    img_gray=255-img_gray
-    # Find connected components (blobs) in the image
-    labels = measure.label(img_gray, connectivity=2, background=0)
-
-    # Create a new image to draw the mask on
-    mask = np.zeros_like(img_gray, dtype=np.uint8)
-    cmask = np.zeros_like(img_gray, dtype=np.uint8)
-    general_mask = np.zeros_like(img_gray, dtype=np.uint8)
-
-    sprites = []
-
-    # Create a list of tuples, where each tuple contains a label and the corresponding area
-    blobs = []
-    for label in np.unique(labels):
-        if label == 0:
-            continue
-        labelMask = np.zeros_like(img_gray, dtype=np.uint8)
-        labelMask[labels == label] = 255
-        contours, _ = cv2.findContours(labelMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        area = sum(cv2.contourArea(contour) for contour in contours)
-        blobs.append((label, area))
-
-    # Sort the blobs by area
-    blobs.sort(key=lambda x: x[1], reverse=True)
-
-    # Iterate over the sorted blobs
-    for label, _ in blobs:
-        # If this is the background label, ignore it
-        if label == 0:
-            continue
-
-        # Construct the label mask
-        labelMask = np.zeros_like(img_gray, dtype=np.uint8)
-        labelMask[labels == label] = 255
-
-        # Find contours in the label mask
-        contours, _ = cv2.findContours(labelMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-
-        # If the contour area is large enough, draw it on the mask
-        for c in contours:
-            area = cv2.contourArea(c)
-            if area > 200:  # set this as per your requirement
-                x, y, w, h = cv2.boundingRect(c)
-                cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
-                # Extract the ROI from the original image
-                ROI = image[y-4:y+h+4, x-4:x+w+4]
-                #ROI = image[y:y+h, x:x+w]
-                
-                if ROI.shape[0] == 0 or ROI.shape[1] == 0:
-                    continue
-                hh, ww = ROI.shape[:2]
-
-                
-                roi_gray = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
-                roi_thresh = cv2.threshold(roi_gray, 224, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-                kernel = np.ones((3,3), np.uint8)
-                thresh = cv2.morphologyEx(roi_thresh, cv2.MORPH_CLOSE, kernel)
-                roi_cnts,_ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                big_contour = max(roi_cnts, key=cv2.contourArea)
-
-                roi_mask = np.zeros_like(thresh)  
-                cv2.drawContours(roi_mask, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
-
-
-                roi_mask2 = np.zeros_like(thresh) 
-                cv2.drawContours(roi_mask2, [big_contour], -1, (255, 255, 255), thickness=cv2.FILLED) 
-                kernel2 = np.ones((5, 5), np.uint8)
-                roi_mask2 = cv2.erode(roi_mask2, kernel2)
-                roi_mask2 = cv2.GaussianBlur(roi_mask2, (3,3), 0)
-
-
-                clean_roi = cv2.bitwise_and(ROI, ROI, mask=roi_mask)
-              
-                inversed_roi_mask=255-roi_mask
-                background = np.full_like(ROI, (255,255,255))
-                empty_background = cv2.bitwise_and(background, background, mask=inversed_roi_mask)
-
-                result_without_alpha = cv2.bitwise_or(clean_roi, empty_background)
-
-                result_with_alpha = cv2.cvtColor(result_without_alpha, cv2.COLOR_BGR2BGRA)
-
-                #if transparency :
-                #    result_with_alpha[..., 3] = roi_mask
-
-                sprites.insert(0,result_without_alpha)
-
-    hh, ww = image.shape[:2]
-
-    # Define the tile size
-    tile_width = tile_height = hh
-
-    # Create an output image with a transparent background, of the size of the atlas
-    #output = np.zeros((tile_height, tile_width * len(sprites), 4), dtype=np.uint8)
-    output = np.full((tile_height, tile_width * len(sprites), 3), [255, 255, 255], dtype=np.uint8)
-
-    # Position of the image in the output image
-    # Position of the image in the output image
-    # Position of the image in the output image
-    x_offset = 0
-
-    # Iterate over the images and add them to the output image
-    for image in sprites:
-        # The size of this image
-        height, width = image.shape[:2]
-
-        # Calculate the y-coordinate to place the image at the bottom of the tile
-        y_offset = tile_height - height
-
-        # Calculate the x-coordinate to place the image at the center of the tile
-        x_center_offset = x_offset + (tile_width - width) // 2
-
-        # Put the image on the output
-        output[y_offset:y_offset+height, x_center_offset:x_center_offset+width] = image
-
-        # Shift the x offset
-        x_offset += tile_width
-
-
-
-    #b, g, r, a = cv2.split(output)
-    #pil_output = Image.fromarray(cv2.merge((r, g, b)))
-
-    #pil_output = Image.fromarray(cv2.merge((r, g, b, a)))
-    #output=cv2.cvtColor(output, cv2.COLOR_RGBA2RGB)
-    #pil_output=Image.fromarray(output)
-
-    pil_output=Image.fromarray(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-
-    return pil_output
 
 
 def create_animation(pil_image):
@@ -571,11 +440,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         with FormRow():
             with gr.Column():
                 with FormRow():
-                    enable = gr.Checkbox(False, label="Enable pixelization")
-                    save_original = gr.Checkbox(False, label="Save original")
+                    enable = gr.Checkbox(True, label="Enable pixelization")
+                    save_original = gr.Checkbox(True, label="Save original")
+                    save_atlas = gr.Checkbox(True, label="Save atlas")
 
-                    save_pixelization = gr.Checkbox(False, label="Save pixelization")
-                    save_transparent = gr.Checkbox(False, label="Save Transparent")
+                    save_pixelization = gr.Checkbox(False, label="Save Pixelization")
+                    save_transparent = gr.Checkbox(True, label="Save Trans Pixelization")
                     upscale_after = gr.Checkbox(False, label="Keep resolution")
 
             with gr.Column():
@@ -590,12 +460,19 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             "pixel_size": pixel_size,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_pixelization,save_transparent,upscale_after, pixel_size):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_atlas,save_pixelization,save_transparent,upscale_after, pixel_size):
         if not enable:
             return
 
+
+        animated_images=create_animation(pp.image)
+        pixel_images=[]
+        trans_images=[]
+
         if (save_original):
-            images.save_image(pp.image,basename= "original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(pp.image,basename= "original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info)
+        if (save_atlas):
+            images.save_image(remove_bg(animated_images[0]),basename= "atlas" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
 
         if self.model is None:
@@ -606,10 +483,6 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         self.model.to(devices.device)
 
-        #image=create_atlas(pp.image)
-        animated_images=create_animation(pp.image)
-        pixel_images=[]
-        trans_images=[]
 
         for image_index, image in enumerate(animated_images):
 
@@ -624,9 +497,9 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                 adain_params = self.model.G_A_net.module.MLP(code)
                 my_images = self.model.G_A_net.module.RGBDec(feature, adain_params)
                 out_t = self.model.alias_net(my_images)
-
-                pixel_images.append(to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after))
-                trans_images.append(remove_bg(image))
+                pixel_image = to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after)
+                pixel_images.append(pixel_image)
+                trans_images.append(remove_bg(pixel_image))
 
   
         self.model.to(devices.cpu)
@@ -635,27 +508,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         trans_output=concatenate_images(trans_images)
         
         if (save_pixelization):
-            images.save_image(pixel_output,basename= "atlas"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(pixel_output,basename= "pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         if (save_transparent):
-            images.save_image(trans_output,basename= "trans"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(trans_output,basename= "trans_pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
 
-def concatenate_images(images):
-    # Determine output dimensions
-    output_width = max(image.width for image in images)
-    output_height = sum(image.height for image in images)
-
-    # Create a new blank image with transparent background
-    output_image = Image.new('RGBA', (output_width, output_height), (0, 0, 0, 0))
-
-    # Paste the images vertically
-    y_offset = 0
-    for image in images:
-        output_image.paste(image, (0, y_offset))
-        y_offset += image.height
-
-    return output_image
