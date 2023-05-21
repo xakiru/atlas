@@ -428,7 +428,7 @@ def create_animation(pil_image):
             max_width_stretch= 6
 
         stretched_width = width-max_width_stretch
-        stretched_height = max_height_stretch+4
+        stretched_height =height+ max_height_stretch
         stretched_image = cv2.resize(image, (stretched_width, stretched_height))
 
         # Calculate the y-coordinate to place the image at the bottom of the tile
