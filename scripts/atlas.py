@@ -289,7 +289,7 @@ class Script(scripts.Script):
             print("len")
             print(len(proc.images))
             if (i==0):
-                if(len(proc.images)>1)
+                if(len(proc.images)>1):
                     continue
 
             if (save_input):
