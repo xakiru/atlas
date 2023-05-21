@@ -415,9 +415,20 @@ def create_animation(pil_image):
     for image in sprites:
         # The size of this image
         height, width = image.shape[:2]
+        max_height_stretch=6
+        if height<42 :
+            max_height_stretch= 2
+        else if height < 84 :
+            max_height_stretch= 4
 
-        stretched_width = width-8
-        stretched_height = height+4
+        max_width_stretch=8
+        if width<42 :
+            max_width_stretch= 4
+        else if width < 84 :
+            max_width_stretch= 6
+
+        stretched_width = width-max_width_stretch
+        stretched_height = max_height_stretch+4
         stretched_image = cv2.resize(image, (stretched_width, stretched_height))
 
         # Calculate the y-coordinate to place the image at the bottom of the tile
@@ -440,10 +451,22 @@ def create_animation(pil_image):
     for image in sprites:
         # The size of this image
         height, width = image.shape[:2]
+        max_height_stretch=16
+        if height<42 :
+            max_height_stretch= 8
+        else if height < 84 :
+            max_height_stretch= 10
 
-        stretched_width = width+8
-        stretched_height = height-16
+        max_width_stretch=8
+        if width<42 :
+            max_width_stretch= 4
+        else if width < 84 :
+            max_width_stretch= 6
+
+        stretched_width = width+max_width_stretch
+        stretched_height = height-max_height_stretch
         stretched_image = cv2.resize(image, (stretched_width, stretched_height))
+
 
         # Calculate the y-coordinate to place the image at the bottom of the tile
         y_offset = tile_height - stretched_height
@@ -578,6 +601,6 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                 # Process each column animation, which is a list of vertically looped images
                 
                 output_path = f'{opts.outdir_img2img_samples}/_animation_{column_index}-{file_id:04d}.gif' # Specify the output path for the GIF file
-                column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=300, loop=0)
+                column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=200, loop=0)
                 column_index += 1
 
