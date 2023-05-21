@@ -86,7 +86,7 @@ path_checkpoints = os.path.join(scripts.basedir(), "checkpoints")
 path_pixelart_vgg19 = os.path.join(path_checkpoints, "pixelart_vgg19.pth")
 path_160_net_G_A = os.path.join(path_checkpoints, "160_net_G_A.pth")
 path_alias_net = os.path.join(path_checkpoints, "alias_net.pth")
-
+gif_id=0
 
 class TorchHijackForC2pGen:
     def __getattr__(self, item):
@@ -407,8 +407,8 @@ def create_animation(pil_image):
         # The size of this image
         height, width = image.shape[:2]
 
-        stretched_width = width-16
-        stretched_height = height+8
+        stretched_width = width-8
+        stretched_height = height+4
         stretched_image = cv2.resize(image, (stretched_width, stretched_height))
 
         # Calculate the y-coordinate to place the image at the bottom of the tile
@@ -473,11 +473,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             with gr.Column():
                 with FormRow():
                     enable = gr.Checkbox(True, label="Enable pixelization")
-                    save_original = gr.Checkbox(True, label="Save original")
-                    save_atlas = gr.Checkbox(True, label="Save atlas")
+                    save_original = gr.Checkbox(True, label="Save Original")
+                    save_atlas = gr.Checkbox(True, label="Save Original Atlas")
 
-                    save_pixelization = gr.Checkbox(False, label="Save Pixelization")
-                    save_transparent = gr.Checkbox(True, label="Save Trans Pixelization")
+                    save_pixelization = gr.Checkbox(False, label="Save Pixelized")
+                    save_transparent = gr.Checkbox(True, label="Save Transparent Pixelized")
+                    save_gifs = gr.Checkbox(False, label="Save Gifs")
                     upscale_after = gr.Checkbox(False, label="Keep resolution")
 
             with gr.Column():
@@ -489,11 +490,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             "save_atlas": save_atlas,
             "save_pixelization": save_pixelization,
             "save_transparent": save_transparent,
+            "save_gifs": save_gifs,
             "upscale_after": upscale_after,
             "pixel_size": pixel_size,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_atlas,save_pixelization,save_transparent,upscale_after, pixel_size):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_atlas,save_pixelization,save_transparent,save_gifs,upscale_after, pixel_size):
         if not enable:
             return
 
@@ -549,12 +551,14 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
-        animations = create_gif(pixel_output, 128, 128)
-        column_index = 0
+        if save_gifs:
+            animations = create_gif(pixel_output, 128, 128)
+            column_index = 0
 
-        for column in animations:
-            # Process each column animation, which is a list of vertically looped images
-            output_path = f'{opts.outdir_img2img_samples}/_animation_{column_index}.gif'  # Specify the output path for the GIF file
-            column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=100, loop=0)
-            column_index += 1
+            for column in animations:
+                # Process each column animation, which is a list of vertically looped images
+                output_path = f'{opts.outdir_img2img_samples}/_animation{gif_id}_{column_index}.gif'  # Specify the output path for the GIF file
+                column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=300, loop=0)
+                column_index += 1
+            gif_id+=gif_id;
 
