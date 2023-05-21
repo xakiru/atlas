@@ -453,15 +453,15 @@ def create_animation(pil_image):
         height, width = image.shape[:2]
         max_height_stretch=16
         if height<42 :
-            max_height_stretch= 8
+            max_height_stretch= 4
         elif height < 84 :
-            max_height_stretch= 10
+            max_height_stretch= 8
 
         max_width_stretch=8
         if width<42 :
-            max_width_stretch= 4
+            max_width_stretch= 2
         elif width < 84 :
-            max_width_stretch= 6
+            max_width_stretch= 4
 
         stretched_width = width+max_width_stretch
         stretched_height = height-max_height_stretch
