@@ -12,8 +12,6 @@ from skimage import measure
 from modules import scripts_postprocessing
 from modules.ui_components import FormRow
 
-
-
 class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
     name = "Atlas"
     order = 9000
@@ -28,11 +26,13 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
                 with FormRow():
                     save_input = gr.Checkbox(False, label="Save Input")
                     save_atlas = gr.Checkbox(False, label="Save Atlas")
+                    save_transparent = gr.Checkbox(False, label="Save Transparent Atlas")
                     forward_atlas = gr.Checkbox(True, label="Forward Atlas")
         return {
             "enable": enable,
             "save_input": save_input,
             "save_atlas": save_atlas,
+            "save_transparent": remove_background,
             "forward_atlas": forward_atlas,
         }
 
@@ -190,3 +190,36 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
         if (forward_atlas):
             pp.image=pil_output
 
+        if save_transparent:
+            pil_image=remove_bg(pil_output)
+            images.save_image(pil_image,basename= "trans" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+
+
+def remove_bg(pil_image):
+    # convert the PIL image to OpenCV format (numpy array)
+    img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+
+    # Create a grayscale version of the image
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Threshold the image: this will create a binary image where
+    # white pixels are those that were greater than 254 and black pixels the rest.
+    _, thresh = cv2.threshold(gray, 230, 255, cv2.THRESH_BINARY_INV)
+
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an empty mask to fill in the found contours
+    mask = np.zeros_like(thresh)
+
+    # Draw white filled contours on the black mask
+    cv2.drawContours(mask, contours, -1, (255), thickness=cv2.FILLED)
+
+    # Create a 4-channel image (RGBA) from the original and the mask
+    rgba = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+    rgba[:, :, 3] = mask
+
+    # Convert the image back to PIL format
+    pil_image = Image.fromarray(cv2.cvtColor(rgba, cv2.COLOR_BGRA2RGBA))
+
+    return pil_image
