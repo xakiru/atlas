@@ -571,7 +571,6 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                     save_pixelization = gr.Checkbox(False, label="Save pixelization")
                     save_atlas = gr.Checkbox(False, label="Save Atlas")
                     save_transparent = gr.Checkbox(False, label="Save Transparent")
-                    enable = gr.Checkbox(False, label="Enable pixelization")
                     upscale_after = gr.Checkbox(False, label="Keep resolution")
 
             with gr.Column():
@@ -587,7 +586,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             "pixel_size": pixel_size,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, upscale_after, pixel_size):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_pixelization,save_atlas,save_transparent,upscale_after, pixel_size):
         if not enable:
             return
 
