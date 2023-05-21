@@ -23,4 +23,4 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
         if not enable:
             return
         
-        images.save_image(pp.image,basename= "original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+        images.save_image(pp.image,basename= str(pp.seed)+"-original" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
