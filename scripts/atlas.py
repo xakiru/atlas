@@ -615,8 +615,8 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             feature = self.model.G_A_net.module.RGBEnc(in_t)
             code = torch.asarray(pixelize_code, device=devices.device).reshape((1, 256, 1, 1))
             adain_params = self.model.G_A_net.module.MLP(code)
-            images = self.model.G_A_net.module.RGBDec(feature, adain_params)
-            out_t = self.model.alias_net(images)
+            my_images = self.model.G_A_net.module.RGBDec(feature, adain_params)
+            out_t = self.model.alias_net(my_images)
 
             image = to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after)
 
