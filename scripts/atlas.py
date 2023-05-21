@@ -545,8 +545,10 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if (save_pixelization):
             images.save_image(pixel_output,basename= "pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
+        test=""
         if (save_transparent):
-            images.save_image(trans_output,basename= "trans_pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            test, _=images.save_image(trans_output,basename= "trans_pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+        print(test)
 
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
