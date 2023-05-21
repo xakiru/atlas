@@ -20,11 +20,9 @@ class ScriptPostprocessingFirstAtlas(scripts_postprocessing.ScriptPostprocessing
         with FormRow():
             with gr.Column():
                 enable = gr.Checkbox(False, label="Enable Saver")
-                animate = gr.Checkbox(False, label="Animate")
 
         return {
             "enable": enable,
-            "animate": animate,
         }
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, enable):
@@ -39,16 +37,14 @@ class ScriptPostprocessingSecondAtlas(scripts_postprocessing.ScriptPostprocessin
     def ui(self):
         with FormRow():
             with gr.Column():
-                enable = gr.Checkbox(False, label="Enable Saver")
-                animate = gr.Checkbox(False, label="Animate")
+                enable2 = gr.Checkbox(False, label="Enable Saver2")
 
         return {
-            "enable": enable,
-            "animate": animate,
+            "enable2": enable,
         }
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, enable):
-        print("ScriptPostprocessingFirstAtlas");
+        print("ScriptPostprocessing2Atlas");
         if not enable:
             return
 
