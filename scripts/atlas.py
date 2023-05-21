@@ -40,25 +40,24 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
         if not enable:
             return
 
-
         if (save_input):
             images.save_image(pp.image,basename= "input" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-        
-            
 
-        image = cv2.cvtColor(np.array(pp.image), cv2.COLOR_RGB2BGR)
-        
-        pil_output=create_atlas(pp.image)
 
+        atlas_output=create_atlas(proc.images[i])
+        
         if (save_atlas):
-            images.save_image(pil_output,basename= "atlas" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(atlas_output,basename= "atlas" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+
+        trans_output=remove_bg(atlas_output)
+
+        if (save_transparent):
+            images.save_image(trans_output,basename= "trans" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         if (forward_atlas):
-            pp.image=pil_output
-
-        if save_transparent:
-            pil_image=remove_bg(pil_output)
-            images.save_image(pil_image,basename= "trans" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            return_images.append(trans_output)
+        else:
+            return_images.append(atlas_output)
 
 
 def remove_bg(pil_image):
@@ -283,8 +282,8 @@ class Script(scripts.Script):
 
         return_images=[]
         for i in range(len(proc.images)):
-            if (i==0):
-                if(len(proc.images)>1):
+            if (len(proc.images)>2):
+                if(i==0):
                     continue
 
             if (save_input):
