@@ -147,7 +147,7 @@ def create_atlas(pil_image):
         # If the contour area is large enough, draw it on the mask
         for c in contours:
             area = cv2.contourArea(c)
-            if area > 1000:  # set this as per your requirement
+            if area > 500:  # set this as per your requirement
                 x, y, w, h = cv2.boundingRect(c)
                 cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                 # Extract the ROI from the original image
@@ -279,21 +279,27 @@ class Script(scripts.Script):
         # use the save_images method from images.py to save
         # them.
 
-        outlined_images=[]
+        return_images=[]
         for i in range(len(proc.images)):
             
+
+            if (save_input):
+                return_images.append(proc.images[i])
+
             pil_output=create_atlas(proc.images[i])
             
             if (save_atlas):
-                images.save_image(pil_output, p.outpath_samples, "atlas_" +str(proc.seed) + "_" + str(i), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
-            
+                return_images.append(pil_output)
+                #images.save_image(pil_output, p.outpath_samples, "atlas_" +str(proc.seed) + "_" + str(i), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
+                
             
 
-            if save_transparent:
-                pil_image=remove_bg(pil_output)
-                images.save_image(pil_output, p.outpath_samples, "trans_" +str(proc.seed) + "_" + str(i), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
+            if (save_transparent):
+                trans_output=remove_bg(pil_output)
+                return_images.append(trans_output)
+                #images.save_image(pil_output, p.outpath_samples, "trans_" +str(proc.seed) + "_" + str(i), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
             
-            outlined_images.add(pil_output)
+            #return_images.append(pil_output)
 
-        proc.images=outlined_images
+        proc.images=return_images
         return proc
