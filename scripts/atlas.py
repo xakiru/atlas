@@ -86,7 +86,7 @@ path_checkpoints = os.path.join(scripts.basedir(), "checkpoints")
 path_pixelart_vgg19 = os.path.join(path_checkpoints, "pixelart_vgg19.pth")
 path_160_net_G_A = os.path.join(path_checkpoints, "160_net_G_A.pth")
 path_alias_net = os.path.join(path_checkpoints, "alias_net.pth")
-gif_id=0
+
 
 class TorchHijackForC2pGen:
     def __getattr__(self, item):
@@ -467,6 +467,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
     name = "Atlas"
     order = 10000
     model = None
+    gif_id = None
 
     def ui(self):
         with FormRow():
@@ -553,13 +554,16 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
+        
+
+
         if save_gifs:
             animations = create_gif(pixel_output, 128, 128)
             column_index = 0
 
             for column in animations:
                 # Process each column animation, which is a list of vertically looped images
-                output_path = f'{opts.outdir_img2img_samples}/_animation{gif_id}_{column_index}.gif'  # Specify the output path for the GIF file
+                output_path =  images.get_next_sequence_number(opts.outdir_img2img_samples, f'_animation_{column_index}.gif') # Specify the output path for the GIF file
                 column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=300, loop=0)
                 column_index += 1
             gif_id+=gif_id;
