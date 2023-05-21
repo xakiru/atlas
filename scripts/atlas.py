@@ -284,20 +284,20 @@ class Script(scripts.Script):
             
 
             if (save_input):
-                images.save_image(proc.images[i], path=p.outpath_samples,basename= str(proc.seed)+"input_" ,  extension=opts.samples_format, info= pp.info) 
+                images.save_image(proc.images[i], path=p.outpath_samples,basename= str(proc.seed)+"-input" ,  extension=opts.samples_format, info= proc.info) 
 
 
             pil_output=create_atlas(proc.images[i])
             
             if (save_atlas):
-                images.save_image(pil_output, path=p.outpath_samples,basename= str(proc.seed)+"_atlas_" ,  extension=opts.samples_format, info= pp.info) 
+                images.save_image(pil_output, path=p.outpath_samples,basename= str(proc.seed)+"-atlas" ,  extension=opts.samples_format, info= proc.info) 
 
             
 
             trans_output=remove_bg(pil_output)
 
             if (save_transparent):
-                images.save_image(trans_output, path=p.outpath_samples,basename= str(proc.seed)+"trans_" ,  extension=opts.samples_format, info= pp.info) 
+                images.save_image(trans_output, path=p.outpath_samples,basename= str(proc.seed)+"-trans" ,  extension=opts.samples_format, info= proc.info) 
 
             return_images.append(trans_output)
             #images.save_image(pil_output, p.outpath_samples, "trans_" +str(proc.seed) + "_" + str(i), proc.seed + i, proc.prompt, opts.samples_format, info= proc.info, p=p)
