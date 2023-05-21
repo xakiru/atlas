@@ -91,11 +91,11 @@ path_alias_net = os.path.join(path_checkpoints, "alias_net.pth")
 
 def extract_number_from_filename(filename):
     pattern = r"\d+"  # Regular expression pattern to match one or more digits
-    match = re.search(pattern, filename)
-    if match:
-        return int(match.group())
+    numbers = re.findall(pattern, filename)
+    if numbers:
+        return int(numbers[-1])  # Extract the last number
     else:
-        return 0
+        return None
 
 class TorchHijackForC2pGen:
     def __getattr__(self, item):
@@ -587,7 +587,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
-        
+        print(file_name)
 
         
         if save_gifs:
