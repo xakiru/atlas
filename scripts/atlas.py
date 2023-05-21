@@ -42,7 +42,7 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
         print(pp.info)
         if (save_input):
-            images.save_image(pp.image,basename= "input_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(pp.image,basename= "input" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
         
             
 
@@ -185,7 +185,7 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
 
         pil_output=Image.fromarray(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
         if (save_atlas):
-            images.save_image(pil_output,basename= "atlas_" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+            images.save_image(pil_output,basename= "atlas" ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         if (forward_atlas):
             pp.image=pil_output
