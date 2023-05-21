@@ -191,6 +191,9 @@ def to_image(tensor, pixel_size, upscale_after):
 
 
 def create_gif(atlas_image, frame_width, frame_height):
+
+    frame_width=atlas_image.width
+
     # Calculate the number of frames in each column
     num_frames = atlas_image.width // frame_width
 
@@ -593,6 +596,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if save_gifs:
             file_id=extract_number_from_filename(str(file_name)) 
             print(file_id)
+            #hardcoded the width
             animations = create_gif(pixel_output, 512, 128)
             column_index = 0
 
