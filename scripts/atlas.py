@@ -627,12 +627,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
 
                 #atlas_output=create_atlas(image)
-                pp.image=atlas_output
+                pp.image=image
 
                 if (save_atlas):
-                    images.save_image(atlas_output,basename= "atlas_"+str(image_index)  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+                    images.save_image(image,basename= "atlas_"+str(image_index)  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
-                trans_output=remove_bg(atlas_output)
+                trans_output=remove_bg(image)
 
                 if (save_transparent):
                     images.save_image(trans_output,basename= "trans_"+str(image_index) ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
