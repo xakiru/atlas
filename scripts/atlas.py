@@ -294,7 +294,7 @@ def create_animation(pil_image):
     # Sort the blobs by area
     blobs.sort(key=lambda x: x[1], reverse=True)
 
-    max_contours = 2  
+    max_contours = 4  
     count_contours = 0 
     used_contours = False
     # Iterate over the sorted blobs
@@ -554,7 +554,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         for column in animations:
             # Process each column animation, which is a list of vertically looped images
-            output_path = f'{opts.outdir_img2img_samples}_animation_{column_index}.gif'  # Specify the output path for the GIF file
-            column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=500, loop=0)
+            output_path = f'{opts.outdir_img2img_samples}/_animation_{column_index}.gif'  # Specify the output path for the GIF file
+            column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=100, loop=0)
             column_index += 1
 
