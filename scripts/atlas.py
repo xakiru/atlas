@@ -26,6 +26,8 @@ import numpy as np
 
 from pixelization.models.networks import define_G
 import pixelization.models.c2pGen
+import re
+
 
 pixelize_code = [
     233356.8125, -27387.5918, -32866.8008, 126575.0312, -181590.0156,
@@ -87,6 +89,13 @@ path_pixelart_vgg19 = os.path.join(path_checkpoints, "pixelart_vgg19.pth")
 path_160_net_G_A = os.path.join(path_checkpoints, "160_net_G_A.pth")
 path_alias_net = os.path.join(path_checkpoints, "alias_net.pth")
 
+def extract_number_from_filename(filename):
+    pattern = r"\d+"  # Regular expression pattern to match one or more digits
+    match = re.search(pattern, filename)
+    if match:
+        return int(match.group())
+    else:
+        return 0
 
 class TorchHijackForC2pGen:
     def __getattr__(self, item):
@@ -549,7 +558,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         test=""
         if (save_transparent):
             test, _=images.save_image(trans_output,basename= "trans_pixel"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-        print(test)
+        file_id=extract_number_from_filename(test)
 
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
@@ -561,10 +570,11 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             animations = create_gif(pixel_output, 128, 128)
             column_index = 0
 
+
             for column in animations:
                 # Process each column animation, which is a list of vertically looped images
-                output_path =  images.get_next_sequence_number(opts.outdir_img2img_samples, f'_animation_{column_index}.gif') # Specify the output path for the GIF file
+                 images.get_next_sequence_number(opts.outdir_img2img_samples, f'_animation_{column_index}.gif') 
+                output_path = opts.outdir_img2img_samples, f'_animation_{column_index}-{file_id:04d}.gif' # Specify the output path for the GIF file
                 column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=300, loop=0)
                 column_index += 1
-            gif_id+=gif_id;
 
