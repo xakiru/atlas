@@ -40,7 +40,7 @@ class ScriptPostprocessingSecondAtlas(scripts_postprocessing.ScriptPostprocessin
                 enable2 = gr.Checkbox(False, label="Enable Saver2")
 
         return {
-            "enable2": enable,
+            "enable2": enable2,
         }
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, enable):
