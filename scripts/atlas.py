@@ -593,14 +593,15 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         if save_gifs:
             file_id=extract_number_from_filename(str(file_name)) 
             print(file_id)
-            animations = create_gif(pixel_output, 128, 128)
+            animations = create_gif(pixel_output, 512, 128)
             column_index = 0
 
 
             for column in animations:
                 # Process each column animation, which is a list of vertically looped images
                 
-                output_path = f'{opts.outdir_img2img_samples}/animation_{column_index}-{file_id:04d}.gif' # Specify the output path for the GIF file
+                #output_path = f'{opts.outdir_img2img_samples}/animation_{column_index}-{file_id:04d}.gif' # Specify the output path for the GIF file
+                output_path = f'{opts.outdir_img2img_samples}/animation-{file_id:04d}.gif' # Specify the output path for the GIF file
                 column[0].save(output_path, format='GIF', append_images=column[1:], save_all=True, duration=150, loop=0)
                 column_index += 1
 
