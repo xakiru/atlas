@@ -454,6 +454,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         return {
             "enable": enable,
             "save_original": save_original,
+            "save_atlas": save_atlas,
             "save_pixelization": save_pixelization,
             "save_transparent": save_transparent,
             "upscale_after": upscale_after,
