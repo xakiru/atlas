@@ -412,12 +412,15 @@ def create_animation(pil_image):
         contours, _ = cv2.findContours(labelMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 
+        max_contours = 4  # Maximum number of contours to consider
+        count_contours = 0 
         # If the contour area is large enough, draw it on the mask
         for c in contours:
             area = cv2.contourArea(c)
             if area > 1200:  # set this as per your requirement
                 x, y, w, h = cv2.boundingRect(c)
-                cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
+                count += 1
+                #cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                 # Extract the ROI from the original image
                 ROI = image[y-4:y+h+4, x-4:x+w+4]
                 #ROI = image[y:y+h, x:x+w]
@@ -460,6 +463,8 @@ def create_animation(pil_image):
 
                 sprites.insert(0,result_without_alpha)
                 sprites.insert(0,ROI)
+                if count >= max_contours:
+                    break
 
     hh, ww = image.shape[:2]
 
