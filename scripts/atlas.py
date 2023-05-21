@@ -32,7 +32,7 @@ class ScriptPostprocessingAtlas(scripts_postprocessing.ScriptPostprocessing):
             "enable": enable,
             "save_input": save_input,
             "save_atlas": save_atlas,
-            "save_transparent": remove_background,
+            "save_transparent": save_transparent,
             "forward_atlas": forward_atlas,
         }
 
