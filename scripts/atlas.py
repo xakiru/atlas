@@ -570,7 +570,6 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                     save_original = gr.Checkbox(False, label="Save original")
 
                     save_pixelization = gr.Checkbox(False, label="Save pixelization")
-                    save_atlas = gr.Checkbox(False, label="Save Atlas")
                     save_transparent = gr.Checkbox(False, label="Save Transparent")
                     upscale_after = gr.Checkbox(False, label="Keep resolution")
 
@@ -581,13 +580,12 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             "enable": enable,
             "save_original": save_original,
             "save_pixelization": save_pixelization,
-            "save_atlas": save_atlas,
             "save_transparent": save_transparent,
             "upscale_after": upscale_after,
             "pixel_size": pixel_size,
         }
 
-    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_pixelization,save_atlas,save_transparent,upscale_after, pixel_size):
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, enable, save_original,save_pixelization,save_transparent,upscale_after, pixel_size):
         if not enable:
             return
 
@@ -605,6 +603,8 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
 
         #image=create_atlas(pp.image)
         animated_images=create_animation(pp.image)
+        pixel_images=[]
+        trans_images=[]
 
         for image_index, image in enumerate(animated_images):
 
@@ -620,29 +620,37 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                 my_images = self.model.G_A_net.module.RGBDec(feature, adain_params)
                 out_t = self.model.alias_net(my_images)
 
-                image = to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after)
+                pixel_images.apend(to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after))
+                trans_images.append(remove_bg(image))
 
-                if (save_pixelization):
-                    images.save_image(image,basename= "input_"+str(image_index) ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-
-
-                #atlas_output=create_atlas(image)
-                pp.image=image
-
-                if (save_atlas):
-                    images.save_image(image,basename= "atlas_"+str(image_index)  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-
-                trans_output=remove_bg(image)
-
-                if (save_transparent):
-                    images.save_image(trans_output,basename= "trans_"+str(image_index) ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
-
-            #if (forward_atlas):
-            #       return_images.append(trans_output)
-
-
+  
         self.model.to(devices.cpu)
 
+        pixel_output=concatenate_images(pixel_images)
+        trans_output=concatenate_images(trans_images)
+        
+        if (save_pixelization):
+            images.save_image(pixel_output,basename= "atlas"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+
+        if (save_transparent):
+            images.save_image(trans_output,basename= "trans"  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+
+        pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
 
+def concatenate_images(images):
+    # Determine output dimensions
+    output_width = max(image.width for image in images)
+    output_height = sum(image.height for image in images)
+
+    # Create a new blank image with transparent background
+    output_image = Image.new('RGBA', (output_width, output_height), (0, 0, 0, 0))
+
+    # Paste the images vertically
+    y_offset = 0
+    for image in images:
+        output_image.paste(image, (0, y_offset))
+        y_offset += image.height
+
+    return output_image
