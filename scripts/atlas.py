@@ -150,9 +150,11 @@ def create_atlas(pil_image):
             area = cv2.contourArea(c)
             if area > 300:  # set this as per your requirement
                 x, y, w, h = cv2.boundingRect(c)
-                cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), 2)
+                #cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                 # Extract the ROI from the original image
+                #ROI = image[y-4:y+h+4, x-4:x+w+4]
                 ROI = image[y:y+h, x:x+w]
+                
                 if ROI.shape[0] == 0 or ROI.shape[1] == 0:
                     continue
                 hh, ww = ROI.shape[:2]
