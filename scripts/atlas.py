@@ -415,7 +415,7 @@ def create_animation(pil_image):
         # If the contour area is large enough, draw it on the mask
         for c in contours:
             area = cv2.contourArea(c)
-            if area > 200:  # set this as per your requirement
+            if area > 1200:  # set this as per your requirement
                 x, y, w, h = cv2.boundingRect(c)
                 cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                 # Extract the ROI from the original image
