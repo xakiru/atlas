@@ -605,7 +605,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         #animated_images=create_animation(pp.image)
 
         #for image_index, image in enumerate(animated_images):
-
+        image_index=1
         image=create_atlas(pp.image)
         image = image.resize((image.width * 4 // pixel_size, image.height * 4 // pixel_size))
 
@@ -621,19 +621,19 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             image = to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after)
 
             if (save_pixelization):
-                images.save_image(image,basename= "input_"+image_index ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+                images.save_image(image,basename= "input_"+str(image_index) ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
 
             atlas_output=create_atlas(image)
             pp.image=atlas_output
 
             if (save_atlas):
-                images.save_image(atlas_output,basename= "atlas_"+image_index  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+                images.save_image(atlas_output,basename= "atlas_"+str(image_index)  ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
             trans_output=remove_bg(atlas_output)
 
             if (save_transparent):
-                images.save_image(trans_output,basename= "trans_"+image_index ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
+                images.save_image(trans_output,basename= "trans_"+str(image_index) ,path=opts.outdir_img2img_samples,  extension=opts.samples_format, info= pp.info) 
 
         #if (forward_atlas):
         #       return_images.append(trans_output)
