@@ -419,7 +419,7 @@ def create_animation(pil_image):
             area = cv2.contourArea(c)
             if area > 1200:  # set this as per your requirement
                 x, y, w, h = cv2.boundingRect(c)
-                count += 1
+                count_contours += 1
                 #cv2.rectangle(image, (x-4, y-4), (x + w+4, y + h+4), (255, 255, 255), 2)
                 # Extract the ROI from the original image
                 ROI = image[y-4:y+h+4, x-4:x+w+4]
@@ -463,7 +463,7 @@ def create_animation(pil_image):
 
                 sprites.insert(0,result_without_alpha)
                 sprites.insert(0,ROI)
-                if count >= max_contours:
+                if count_contours >= max_contours:
                     break
 
     hh, ww = image.shape[:2]
