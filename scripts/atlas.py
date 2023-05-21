@@ -625,7 +625,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
                 my_images = self.model.G_A_net.module.RGBDec(feature, adain_params)
                 out_t = self.model.alias_net(my_images)
 
-                pixel_images.apend(to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after))
+                pixel_images.append(to_image(out_t, pixel_size=pixel_size, upscale_after=upscale_after))
                 trans_images.append(remove_bg(image))
 
   
