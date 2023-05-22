@@ -589,12 +589,9 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
-        print(file_name)
-
         
         if save_gifs:
             file_id=extract_number_from_filename(str(file_name)) 
-            print(file_id)
             #hardcoded the width
             animations = create_gif(pixel_output,  128)
             column_index = 0
