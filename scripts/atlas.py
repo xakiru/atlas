@@ -598,6 +598,7 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
             column_index = 0
 
 
+
             for column in animations:
                 # Process each column animation, which is a list of vertically looped images
                 
