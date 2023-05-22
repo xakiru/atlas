@@ -13,7 +13,7 @@ from skimage import measure
 from modules import scripts_postprocessing
 from modules.ui_components import FormRow
 import os
-
+import datetime
 from modules import scripts_postprocessing, devices, scripts
 import gradio as gr
 
@@ -589,9 +589,10 @@ class ScriptPostprocessingUpscale(scripts_postprocessing.ScriptPostprocessing):
         pp.image=pixel_output
         pp.info["Pixelization pixel size"] = pixel_size
 
-        
+        file_id=extract_number_from_filename(str(file_name)) 
+        current_time = datetime.datetime.now()
+        print("{} > {}".format(current_time,file_id))
         if save_gifs:
-            file_id=extract_number_from_filename(str(file_name)) 
             #hardcoded the width
             animations = create_gif(pixel_output,  128)
             column_index = 0
